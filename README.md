@@ -17,7 +17,7 @@ beyond your own model calls.
 ## Install
 
 ```sh
-dsh plugin --profile web add dsh-xingye
+dsh plugin --profile web add 'github:Iambatman1928/dsh-xingye'
 ```
 
 Then **restart DSH** and:
@@ -37,10 +37,11 @@ full-page character manager.
 > a preset you have edited, and logs exactly what it did. To opt out, set `installPreset: false` on this
 > plugin's row and copy `node_modules/dsh-xingye/preset/` to `~/.dsh/.agent-presets/xingye/` yourself.
 
-Install from source instead:
+A prebuilt tarball is attached to every [release](https://github.com/Iambatman1928/dsh-xingye/releases/latest),
+which skips pnpm's build-approval step:
 
 ```sh
-dsh plugin --profile web add 'github:Iambatman1928/dsh-xingye'
+dsh plugin --profile web add 'https://github.com/Iambatman1928/dsh-xingye/releases/latest/download/dsh-xingye.tgz'
 ```
 
 ## The interface

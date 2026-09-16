@@ -15,7 +15,7 @@
 ## 安装
 
 ```sh
-dsh plugin --profile web add dsh-xingye
+dsh plugin --profile web add 'github:Iambatman1928/dsh-xingye'
 ```
 
 装完 **重启 DSH**，然后：
@@ -36,8 +36,11 @@ dsh plugin --profile web add dsh-xingye
 
 从源码安装：
 
+每个 [Release](https://github.com/Iambatman1928/dsh-xingye/releases/latest) 都附一个预构建 tarball，
+用它装可以免掉 pnpm 的构建授权步骤：
+
 ```sh
-dsh plugin --profile web add 'github:Iambatman1928/dsh-xingye'
+dsh plugin --profile web add 'https://github.com/Iambatman1928/dsh-xingye/releases/latest/download/dsh-xingye.tgz'
 ```
 
 ## 界面
