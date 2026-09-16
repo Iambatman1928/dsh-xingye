@@ -1,0 +1,115 @@
+# 星野 —— 聊天 Agent 的 preset 组合
+#
+# 这份组合由 shipped 的 `standard` 复制而来，然后按「聊天」而不是「写代码」重新裁剪：
+# 去掉 shell、后台任务、计划模式、目标、子代理/工作流这些编码场景的行，
+# 换成 `xingye` 这一行插件，由它提供人物 / 人设 / 档案 / 撤销能力。
+#
+# 平面规则：这是一个 AGENT-PLANE 组合，挂在单个会话的作用域上。
+# 提交服务的行必须待在带 `isolate` realm 的 group 里，否则会注册进进程全局 realm，
+# 第二个挂载同一 preset 的会话就会撞名（mount 会直接拒绝）。
+# 这里只有 `compaction` 一个这样的 group。
+
+# ── 身份 ────────────────────────────────────────────────────────────────────
+
+# 覆盖部署默认的 persona：这是「把本 agent 改造成星野」的第一层。
+# `{{model}}` / `{{cwd}}` 由 agent 自己的路由与工作区解析。
+- id: persona
+  name: '@deepseek-ai/dsh-persona'
+  config:
+    text: >-
+      你是「星野」——用户自己的聊天 agent，一位安静的陪伴者。当前模型是 {{model}}，工作目录是 {{cwd}}。
+
+# 仍然让 AGENTS.md 一类的项目/用户规则进入上下文。
+- id: agent-instructions
+  name: '@deepseek-ai/dsh-agent-instructions'
+  config:
+    maxBytes: 65536
+
+# ── 星野 本体 ───────────────────────────────────────────────────────────────
+
+# 人物 / 人设 / 档案 / 用户人设 / 撤销 / 回溯 / 清理，全部由这一行提供：
+#   * 身份说明写进系统提示（固定 section）
+#   * 当前人物、当前档案、用户人设每一步重新注入（动态 context）
+#   * 监听 session/event，把对话原话镜像进当前档案的本地记录
+#
+# 用相对路径而不是绝对路径：插件跟着 preset 目录走，整个目录复制一份仍然可用。
+# 注意它不能 import @deepseek-ai/* —— 预设目录不在部署包的 node_modules 解析链上，
+# 只能用 node: 内建模块，工具定义因此手写 JSON Schema（见 plugin/tools.js）。
+- id: xingye
+  name: './plugin/index.js'
+  config:
+    # 数据根。留空/不写 = `<DSH_HOME>/xingye-data`，与 profile 插件 `dsh-xingye`
+    # 的默认值一致。要改的话两边都得改，否则界面读的是另一份数据。
+    # dataRoot: '~/.dsh/xingye-data'
+
+    # 记忆图片的出图服务。DSH 自身没有图像生成能力，出图只能由插件自己调外部 API，
+    # 所以这里是 OpenAI 兼容的 POST {baseURL}/images/generations。
+    # 下面给的是一个 OpenAI 兼容端点示例（火山方舟）；换成任何兼容服务都可以。
+    # model 留空 = 不出图，星野会把绘图提示词存进画廊（待出图），不影响其他功能。
+    # 填好 model 并把 key 放进环境变量后，重启 DSH 即可开始自动出图。
+    image:
+      baseURL: 'https://ark.cn-beijing.volces.com/api/v3'
+      apiKeyEnv: 'ARK_API_KEY'
+      model: ''
+      size: '1024x1024'
+
+# ── 文件与检索 ──────────────────────────────────────────────────────────────
+
+# 两行都只往宿主的 tools 注册表里登记，自身不提供任何服务，所以不需要 realm。
+# `fs` 服务与它的策略留在 host 组合里。
+- id: tool-fs
+  name: '@deepseek-ai/dsh-tool-fs'
+
+- id: tool-fs-search
+  name: '@deepseek-ai/dsh-tool-fs-search'
+  config:
+    sampleOverCapGlobResults: false
+
+# ── 技能 ────────────────────────────────────────────────────────────────────
+
+# 技能注册表在 host 组合里、按 scope 分层；这两行注册进本会话那一层。
+- id: skill-filesystem
+  name: '@deepseek-ai/dsh-skill-filesystem'
+
+- id: tool-skill
+  name: '@deepseek-ai/dsh-tool-skill'
+
+# ── 联网 ────────────────────────────────────────────────────────────────────
+
+# `web` 服务与搜索提供者在 host 组合里；这一行只给本会话模型可见的工具。
+- id: tool-web
+  name: '@deepseek-ai/dsh-tool-web'
+  config:
+    fetch: true
+    searchTimeoutMs: 60000
+
+# ── 向用户提问 ──────────────────────────────────────────────────────────────
+
+# 「想跟谁聊」「要导入哪个文件」这类只有用户能定的选择，用结构化提问而不是猜。
+- id: tool-ask-user
+  name: '@deepseek-ai/dsh-tool-ask-user'
+
+# ── 长对话压缩 ──────────────────────────────────────────────────────────────
+
+# `compaction-basic` 通过 ctx.get 读 toolResultPruner，所以两者必须共用这个 realm；
+# `tokenMeter` 故意不在 realm 里 —— 它是 host 平面的单例，浏览器读的上下文计量
+# 投影单位归它所有，放进 realm 会随 preset 挂载漂移。
+- id: compaction
+  name: cordis:group
+  group: true
+  isolate:
+    compaction: true
+    toolResultPruner: true
+  config:
+    - id: compaction-basic
+      name: '@deepseek-ai/dsh-compaction-basic'
+
+    - id: command-compact
+      name: '@deepseek-ai/dsh-command-compact'
+
+    - id: tool-result-pruner
+      name: '@deepseek-ai/dsh-compaction-tool-result-pruner'
+      config:
+        thresholdChars: 8192
+        headChars: 4096
+        tailChars: 1024

@@ -1,0 +1,17 @@
+# dsh-xingye bundle patch
+#
+# 把「星野」注册进 profile：
+#   * Host 半 提供 /xingye/api 路由（界面数据出口 + 动作入口），
+#     并在缺失时把随包的 agent preset `xingye` 落进 <DSH_HOME>/.agent-presets/。
+#   * Client 半 在 shell.overlay 与 conversation 的座位里渲染四个整页。
+#
+# dataRoot 留空 = `<DSH_HOME>/xingye-data`，与 agent preset 行里的默认值一致。
+# 要挪数据目录的话**两边都得写**，否则界面读的是另一份数据：
+#
+#   config:
+#     dataRoot: 'D:/my-data/xingye'
+#
+# installPreset: false 可以关掉「自动落 preset」那一步（只想手装 preset 时用）。
+- insert:
+    - id: xingye-ui
+      name: 'dsh-xingye'

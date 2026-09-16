@@ -1,0 +1,8 @@
+{
+  "name": "dsh-xingye-agent-plugin",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "星野 —— DSH 聊天 agent 的人设 / 档案 / 撤销能力插件（零依赖，只允许 node: 内建模块）。随 agent preset 目录一起发行，不单独安装。",
+  "main": "index.js"
+}

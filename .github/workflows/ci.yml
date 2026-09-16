@@ -1,0 +1,38 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # The preset plugin has zero dependencies and only imports `node:` builtins,
+      # so the functional suite runs with no install step at all.
+      - name: Preset plugin — full flow
+        run: node tools/verify.mjs
+
+      # The UI suites need React. They are skipped rather than failed when no
+      # same-source react/react-dom pair can be resolved, because that absence
+      # says something about the machine, not about the code.
+      - name: Resolve React for the client suite
+        id: react
+        run: |
+          npm i --no-save --no-package-lock react@18 react-dom@18
+          echo "dir=$PWD/node_modules" >> "$GITHUB_OUTPUT"
+
+      - name: Client half — offline render
+        env:
+          DSH_NODE_MODULES: ${{ steps.react.outputs.dir }}
+        run: node tools/ui-client-render-test.mjs
+
+      - name: Host half — routes
+        run: node tools/ui-host-route-test.mjs
