@@ -203,6 +203,7 @@ dsh-xingye/
 
 ```sh
 node tools/verify.mjs                  # preset 插件全流程（假 ctx，不需要 DSH）
+node tools/preset-install-test.mjs     # 随包 preset 的落盘行为（临时 DSH_HOME，不碰你的 ~/.dsh）
 node tools/ui-client-render-test.mjs   # Client 半离线渲染（真 React + 迷你运行时跑 effect）
 node tools/ui-host-route-test.mjs      # Host 半路由（假 req/res）
 ```

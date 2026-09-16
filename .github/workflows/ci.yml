@@ -20,6 +20,10 @@ jobs:
       - name: Preset plugin — full flow
         run: node tools/verify.mjs
 
+      # Host half: bundled-preset materialisation, in a throwaway $DSH_HOME.
+      - name: Host half — bundled preset install
+        run: node tools/preset-install-test.mjs
+
       # The UI suites need React. They are skipped rather than failed when no
       # same-source react/react-dom pair can be resolved, because that absence
       # says something about the machine, not about the code.

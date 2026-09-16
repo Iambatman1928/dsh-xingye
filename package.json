@@ -32,7 +32,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "test": "node tools/verify.mjs && node tools/ui-client-render-test.mjs && node tools/ui-host-route-test.mjs"
+    "test": "node tools/verify.mjs && node tools/preset-install-test.mjs && node tools/ui-client-render-test.mjs && node tools/ui-host-route-test.mjs"
   },
   "repository": {
     "type": "git",

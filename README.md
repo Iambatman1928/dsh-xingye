@@ -218,6 +218,7 @@ package's `node_modules` resolution chain.
 
 ```sh
 node tools/verify.mjs                  # preset plugin, full flow (fake ctx, no DSH needed)
+node tools/preset-install-test.mjs     # bundled-preset materialisation, in a throwaway $DSH_HOME
 node tools/ui-client-render-test.mjs   # client half rendered offline (real React + a mini runtime that runs effects)
 node tools/ui-host-route-test.mjs      # host half routes (fake req/res)
 ```
