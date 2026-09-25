@@ -190,7 +190,8 @@ export function writeUiState(store, extra = {}) {
   }
 
   const file = path.join(store.root, 'ui-state.json')
-  const tmp = `${file}.tmp`
+  // 唯一临时文件名，避免多实例并发写入时 Windows EPERM 文件锁
+  const tmp = `${file}.${process.pid}.${Date.now()}.tmp`
   fs.writeFileSync(tmp, `${JSON.stringify(snapshot, null, 2)}\n`, 'utf8')
   fs.renameSync(tmp, file)
   return file
