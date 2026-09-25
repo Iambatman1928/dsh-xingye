@@ -1,6 +1,6 @@
 {
   "name": "dsh-xingye",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "星野 —— 把 DSH 的一个会话变成聊天 agent：自己新建人物、写人设、为同一人物开多条档案线分别会话、给自己切换多套人设；对话记录只留在本机，可回溯、可撤销最近 30 条、超期内容定期压成梗概。",
   "keywords": [
     "deepseek",
